@@ -1,5 +1,5 @@
 import { createContext, useReducer } from 'react'
-
+import axios from "axios";
 /**
  * This is the state shape
  */
@@ -40,10 +40,13 @@ type MatrixAction = {
    */
   payload?: import('../../types').Matrix
 } | {
-  type: 'SOME_ACTION',
+  type: 'EDIT_CELL',
   payload: any
-} // Here you will need to add your other action(s) in order to edit the pricing (remove SOME_ACTION).
-
+} // Here you will need to add your other action(s) in order to edit the pricing (remove EDIT_CELL).
+| {
+  type: 'CLEAR_MATRIX',
+  payload?: import('../../types').Matrix
+}
 /**
  * This is for the Provider component. No need to change.
  */
@@ -93,15 +96,51 @@ const defaultState: MatrixTableState = {
  * @param action 
  */
 const reducer = (state: MatrixTableState, action: MatrixAction): MatrixTableState => {
+  console.log("action>>", action.type)
+  console.log("action payload>>", action.payload)
+  console.log("full state>>", state);
   switch(action.type) {
+    // Save latest matrix
     case 'SET_MATRIX':
-      return {
-        ...state,
-      }
-    case 'SET_ORIGINAL_MATRIX':
+      state.matrix = action.payload;
+      state.originalMatrix = action.payload;      
       return {
         ...state
       }
+    // Revert matrix to original value
+    case 'SET_ORIGINAL_MATRIX':
+      const resetState: MatrixTableState = {
+        matrix: state.originalMatrix || emptyMatrix,
+        originalMatrix: state.originalMatrix || emptyMatrix
+      }
+      return resetState;
+    // Empty current matrix
+    case 'CLEAR_MATRIX':
+      const clearState: MatrixTableState = {
+        matrix: emptyMatrix,
+        originalMatrix: state.originalMatrix || emptyMatrix
+      }
+      return clearState;
+    // Update matrix on every keystroke
+    case 'EDIT_CELL': 
+      if(action.payload.level === 'lite') {
+        // Update standard to 2x and unlimited to 3x if cell being change is lite
+        return {
+          ...state, matrix: { 
+            ...state.matrix, [action.payload.months]: {
+              lite:Number(action.payload.value),
+              standard:Number(action.payload.value)*2,
+              unlimited:Number(action.payload.value)*3
+          }}
+        }
+      }
+      else {
+        // Update specific cell (standard/unlimited)
+        return {
+          ...state, matrix: { ...state.matrix, [action.payload.months]: { ...state.matrix[action.payload.months], [action.payload.level]:Number(action.payload.value)}}
+        }
+      }
+
     default:
       return state
   }
