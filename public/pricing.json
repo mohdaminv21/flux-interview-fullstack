@@ -1,0 +1,22 @@
+{
+  "36months": {
+    "lite": 1250,
+    "standard": 2500,
+    "unlimited": 3750
+  },
+  "24months": {
+    "lite": 2592.8,
+    "standard": 2981.72,
+    "unlimited": 3889.2
+  },
+  "12months": {
+    "lite": 2592.8,
+    "standard": 2981.72,
+    "unlimited": 3889.2
+  },
+  "mtm": {
+    "lite": 2592.8,
+    "standard": 2981.72,
+    "unlimited": 3889.2
+  }
+}
